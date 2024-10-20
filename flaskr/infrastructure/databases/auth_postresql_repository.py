@@ -4,7 +4,7 @@ from typing import List, Optional
 from uuid import UUID
 from ...domain.models import Auth
 from ...domain.interfaces import AuthRepository
-from ...infrastructure.databases.auth_model_sqlalchemy import Base, AuthModelSqlAlchemy
+from ...infrastructure.databases.model_sqlalchemy import Base, AuthUserModelSqlAlchemy
 
 class AuthPostgresqlRepository(AuthRepository):
     def __init__(self, connection_string: str):

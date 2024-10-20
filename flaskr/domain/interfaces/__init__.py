@@ -1,1 +1,2 @@
-from .auth_repository import *
+from .AuthRepository import *
+from .AuthUserCustomerRepository import *
