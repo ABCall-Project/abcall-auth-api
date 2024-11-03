@@ -24,6 +24,20 @@ class AuthCustomerPostgresqlRepository(AuthUserCustomerRepository):
         finally:
             session.close()
 
+
+    def get_company_by_user(self,user_id) -> AuthUserCustomer:
+        session = self.Session()
+        try:
+            print(f'user id en el repository {user_id}')
+            auth_user_customer = session.query(AuthUserCustomerModelSqlAlchemy).filter_by(auth_user_id=user_id).first()
+            print(f'el auth_user_customer {auth_user_customer}')
+            if auth_user_customer:
+                return self._from_model(auth_user_customer)
+            else:
+                return None
+        finally:
+            session.close()
+
     
     def _from_model(self, model: AuthUserCustomerModelSqlAlchemy) -> AuthUserCustomer:
         return AuthUserCustomer(
