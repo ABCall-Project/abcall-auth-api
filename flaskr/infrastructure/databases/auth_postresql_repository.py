@@ -6,24 +6,27 @@ from ...domain.models import Auth
 from ...domain.interfaces import AuthRepository
 from ...infrastructure.databases.model_sqlalchemy import Base, AuthUserModelSqlAlchemy
 from ...utils import Logger
+from .postgres.db import Session, engine
 log = Logger()
 class AuthPostgresqlRepository(AuthRepository):
-    def __init__(self, connection_string: str):
-        self.engine = create_engine(connection_string)
-        self.Session = sessionmaker(bind=self.engine)
+    def __init__(self):
+        self.engine = engine
+        self.session = Session
         self._create_tables()
 
     def _create_tables(self):
         Base.metadata.create_all(self.engine)
 
     def list_users_by_role(self,role_id) -> List[Auth]:
-        log.info('Receive request AuthPostgresqlRepository --->')
-        session = self.Session()
-        try:
-            auth_users= session.query(AuthUserModelSqlAlchemy).filter_by(role_id=role_id).all()
-            return [self._from_model(auth_user_model) for auth_user_model in auth_users]
-        finally:
-            session.close()
+        with self.session() as session:
+            log.info('Receive request AuthPostgresqlRepository --->')
+            try:
+                auth_users= session.query(AuthUserModelSqlAlchemy).filter_by(role_id=role_id).all()
+                print('**auth_users')
+                print(auth_users)
+                return [self._from_model(auth_user_model) for auth_user_model in auth_users]
+            finally:
+                session.close()
 
     def _from_model(self, model: AuthUserModelSqlAlchemy) -> Auth:
         return Auth(

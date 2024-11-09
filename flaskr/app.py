@@ -8,6 +8,7 @@ from .endpoint import HealthCheck,AuthUser
 import signal
 import logging
 from flask_cors import CORS
+from .infrastructure.databases.postgres.db import Session
 
 config = Config()
 
@@ -33,3 +34,7 @@ api = Api(app)
 #resources
 api.add_resource(HealthCheck, '/health')
 api.add_resource(AuthUser, '/users/<string:action>')
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    Session.remove()
