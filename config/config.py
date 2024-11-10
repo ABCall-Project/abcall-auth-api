@@ -14,3 +14,4 @@ class Config:
     ENVIRONMENT = environment
     APP_NAME=os.getenv('APP_NAME')
     DATABASE_URI=os.getenv('DATABASE_URI')
+    SECRET_CYPHER_KEY=os.getenv('SECRET_CYPHER_KEY')
