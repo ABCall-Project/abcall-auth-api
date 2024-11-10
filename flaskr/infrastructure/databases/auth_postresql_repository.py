@@ -53,7 +53,10 @@ class AuthPostgresqlRepository(AuthRepository):
         session=self.Session()
         try:
             user=session.query(AuthUserModelSqlAlchemy).filter_by(email=email).first()
-            log.info(f'user found {user}')
-            return self._from_model(user)
+            if user:
+                log.info(f'user found {user}')
+                return self._from_model(user)
+            else:
+                return None
         finally:
             session.close()
