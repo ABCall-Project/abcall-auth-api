@@ -39,6 +39,22 @@ class AuthCustomerPostgresqlRepository(AuthUserCustomerRepository):
                     return None
             finally:
                 session.close()
+    def create(self, user: AuthUserCustomer) -> AuthUserCustomer:
+        with self.session() as session:
+            try:
+                auth_user_customer = AuthUserCustomerModelSqlAlchemy(
+                    auth_user_id=user.auth_user_id,
+                    customer_id=user.customer_id
+                )
+                session.add(auth_user_customer)
+                session.commit()
+                session.refresh(auth_user_customer)
+                return self._from_model(auth_user_customer)
+            except Exception as ex:
+                log.error(f'Some error occurred trying to create user {ex}')
+                raise ex
+            finally:
+                session.close()
 
     
     def _from_model(self, model: AuthUserCustomerModelSqlAlchemy) -> AuthUserCustomer:

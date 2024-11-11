@@ -16,7 +16,7 @@ class AuthUser(Resource):
 
     def __init__(self):
         config = Config()
-        self.auth_user_customer_repository = AuthCustomerPostgresqlRepository(config.DATABASE_URI)
+        self.auth_user_customer_repository = AuthCustomerPostgresqlRepository()
         self.auth_repository = AuthPostgresqlRepository(config.DATABASE_URI)
         self.service = AuthService(self.auth_repository, self.auth_user_customer_repository)
 

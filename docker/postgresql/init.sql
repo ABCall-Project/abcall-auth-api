@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS auth_user (
     birthdate TIMESTAMP WITH TIME ZONE,
     password VARCHAR(255),
     role_id UUID,
+    salt VARCHAR(255),
     CONSTRAINT fk_role
         FOREIGN KEY (role_id) 
         REFERENCES role (id)

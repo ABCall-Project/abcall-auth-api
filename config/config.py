@@ -14,3 +14,4 @@ class Config:
     ENVIRONMENT = environment
     APP_NAME=os.getenv('APP_NAME')
     DATABASE_URI=os.getenv('DATABASE_URI')
+    PHRASE_KEY=os.getenv('PHRASE_KEY')

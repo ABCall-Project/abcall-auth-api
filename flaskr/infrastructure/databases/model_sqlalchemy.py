@@ -18,6 +18,7 @@ class AuthUserModelSqlAlchemy(Base):
     address=Column(String(255), nullable=True)
     password=Column(String(255), nullable=True)
     birthdate = Column(DateTime(timezone=True))
+    salt = Column(String(255), nullable=True)
     role_id = Column(PG_UUID(as_uuid=True),ForeignKey('role.id'), nullable=True)
     role = relationship("RoleModelSqlAlchemy")
 

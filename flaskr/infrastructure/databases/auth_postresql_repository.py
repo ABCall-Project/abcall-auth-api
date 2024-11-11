@@ -22,9 +22,42 @@ class AuthPostgresqlRepository(AuthRepository):
             log.info('Receive request AuthPostgresqlRepository --->')
             try:
                 auth_users= session.query(AuthUserModelSqlAlchemy).filter_by(role_id=role_id).all()
-                print('**auth_users')
-                print(auth_users)
                 return [self._from_model(auth_user_model) for auth_user_model in auth_users]
+            finally:
+                session.close()
+    
+    def create(self, user: Auth)-> Auth:
+        with self.session() as session:
+            try:
+                auth_user = AuthUserModelSqlAlchemy(
+                    name=user.name,
+                    password= user.password,
+                    last_name=user.last_name,
+                    phone_number=user.phone_number,
+                    email=user.email,
+                    address=user.address,
+                    birthdate=user.birthdate,
+                    role_id=user.role_id,
+                    salt = user.salt
+                )
+                session.add(auth_user)
+                session.commit()
+                session.refresh(auth_user)
+                return self._from_model(auth_user)
+            except Exception as ex:
+                log.error(f'Some error occurred trying to create user {ex}')
+                raise ex
+            finally:
+                session.close()
+    
+    def find_by_email(self, email: str) -> Optional[Auth]:
+        with self.session() as session:
+            try:
+                auth_user = session.query(AuthUserModelSqlAlchemy).filter_by(email=email).first()
+                if auth_user:
+                    return self._from_model(auth_user)
+                else:
+                    return None
             finally:
                 session.close()
 
@@ -37,5 +70,7 @@ class AuthPostgresqlRepository(AuthRepository):
             email=model.email,
             address=model.address,
             birthdate=model.birthdate,
-            role_id=model.role_id
+            role_id=model.role_id,
+            password=model.password,
+            salt=model.salt
         )

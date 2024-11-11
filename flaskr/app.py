@@ -9,6 +9,7 @@ import signal
 import logging
 from flask_cors import CORS
 from .infrastructure.databases.postgres.db import Session
+from flaskr.endpoint.User.User import User
 
 config = Config()
 
@@ -31,9 +32,10 @@ app_context.push()
 
 api = Api(app)
 
-#resources
 api.add_resource(HealthCheck, '/health')
 api.add_resource(AuthUser, '/users/<string:action>')
+user_view = User.as_view('user')
+app.add_url_rule('/user', view_func=user_view, methods=['POST'])
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
