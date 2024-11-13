@@ -1,9 +1,9 @@
 from flask import jsonify
 from typing import List
+from ..utils.logger import Logger
 from ..domain.models import Auth, AuthUserCustomer
 from ..domain.interfaces.AuthRepository import AuthRepository
 from ..domain.interfaces.AuthUserCustomerRepository import AuthUserCustomerRepository
-from ..utils import Logger
 
 class AuthService:
     def __init__(self, auth_repository: AuthRepository=None, auth_user_customer_repository: AuthUserCustomerRepository=None):
@@ -32,7 +32,7 @@ class AuthService:
                 self.auth_user_customer_repository.create(new_auth_user_customer)
                 self.log.info('User created')
             else:
-                self.log.warning('User already exists')
+                self.log.warn('User already exists')
                 raise ValueError('User already exists')
         except Exception as ex:
             self.log.error(f'Some error occurred trying to post user company {ex}')

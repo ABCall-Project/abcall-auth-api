@@ -5,3 +5,6 @@ from ..models.auth import Auth
 class AuthRepository:
     def list_users_by_role(self,role_id) -> List[Auth]:
         raise NotImplementedError
+    
+    def create(self, user: Auth)-> Auth:
+        raise NotImplementedError
