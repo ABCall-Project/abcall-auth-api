@@ -54,7 +54,8 @@ docker-dev-down:
 	docker compose -f=docker-compose.develop.yml down
 
 docker-test-up:
-	docker compose -f=docker-compose.test.yml up --build
+	docker compose -f=docker-compose.test.yml up --build -d
+	docker ps
 	sleep 2
 
 docker-test-down:
