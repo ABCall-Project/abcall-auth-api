@@ -27,13 +27,11 @@ endif
 
 run-tests:
 	make docker-test-up
-	sleep 3
 	FLASK_ENV=test python -m unittest discover -s tests -p '*Test.py' -v
 	make docker-test-down
 
 run-tests-coverage:
 	make docker-test-up
-	sleep 3
 	FLASK_ENV=test coverage run -m unittest discover -s tests -p '*Test.py' -v
 	coverage report -m
 	coverage html
@@ -57,10 +55,12 @@ docker-dev-down:
 
 docker-test-up:
 	docker compose -f=docker-compose.test.yml up --build -d
+	sleep 2
 
 docker-test-down:
 	make docker-db-truncate
 	docker compose -f=docker-compose.test.yml down
+	sleep 2
 
 create-database:
 	docker exec auth-local-test-db psql -U develop -d auth-db -f /docker-entrypoint-initdb.d/init.sql
