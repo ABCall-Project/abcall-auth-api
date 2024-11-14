@@ -59,15 +59,16 @@ docker-test-up:
 	docker compose -f=docker-compose.test.yml up --build -d
 
 docker-test-down:
-	make docker-db-trancate
+	make docker-db-truncate
 	docker compose -f=docker-compose.test.yml down
 
 create-database:
-	docker exec auth-local-db psql -U develop -d auth-db -f /docker-entrypoint-initdb.d/init.sql
+	docker exec auth-local-test-db psql -U develop -d auth-db -f /docker-entrypoint-initdb.d/init.sql
 
 docker-db-truncate:
-	docker exec auth-db psql -U develop -d auth-db  -c  "TRUNCATE TABLE auth_user CASCADE;"
-	docker exec auth-db psql -U develop -d auth-db  -c  "TRUNCATE TABLE auth_user_customer CASCADE;"
+	docker exec auth-local-test-db psql -U develop -d auth-db  -c  "TRUNCATE TABLE role CASCADE;"
+	docker exec auth-local-test-db psql -U develop -d auth-db  -c  "TRUNCATE TABLE auth_user CASCADE;"
+	docker exec auth-local-test-db psql -U develop -d auth-db  -c  "TRUNCATE TABLE auth_user_customer CASCADE;"
 
 
 kubernetes-up:

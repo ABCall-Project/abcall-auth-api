@@ -6,11 +6,11 @@ class Config:
         environment = os.getenv('FLASK_ENV')
 
         if environment == 'local':
-            load_dotenv(dotenv_path='.env.local')
+            load_dotenv(dotenv_path='.env.local', override=True)
         elif environment == 'test':
-            load_dotenv(dotenv_path='.env.test')
+            load_dotenv(dotenv_path='.env.test', override=True)
         else:
-            load_dotenv(dotenv_path='.env')
+            load_dotenv(dotenv_path='.env', override=True)
 
         self.ENVIRONMENT = environment
         self.APP_NAME=os.getenv('APP_NAME')
