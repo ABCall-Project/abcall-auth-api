@@ -30,6 +30,12 @@ class AuthUser(Resource):
         else:
             return {"message": "Action not found"}, 404
         
+    def post(self, action=None):
+        if action == 'getUserByCredentials':
+            return self.get_user_by_credentials()
+        else:
+            return {"message": "Action not found"}, 404
+        
     
     def getUsersByCustomer(self):
 
@@ -69,5 +75,27 @@ class AuthUser(Resource):
         except Exception as ex:
             log.error(f'Some error occurred trying to get the data company by user: {ex}')
             return {'message': 'Something was wrong trying to get data company by user'}, HTTPStatus.INTERNAL_SERVER_ERROR
+        
+    def get_user_by_credentials(self):
+        try:
+
+            if request.is_json:  
+                data = request.get_json()
+                email = data.get('email')
+                password = data.get('password')
+                log.info(f'Receive request to get user by credentials {email}')
+                user = self.service.get_user_by_credentials(email,password)
+                if user:
+                    user_s=user.to_dict()
+                    return user_s, HTTPStatus.OK
+                else:
+                    return None, HTTPStatus.NOT_FOUND
+            else:
+                return None, HTTPStatus.BAD_REQUEST
+        
+            
+        except Exception as ex:
+            log.error(f'Some error occurred trying to get user by credentials: {ex}')
+            return {'message': 'Something was wrong trying to get user by credentials'}, HTTPStatus.INTERNAL_SERVER_ERROR
     
     

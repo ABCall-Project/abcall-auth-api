@@ -8,3 +8,6 @@ class AuthRepository:
     
     def create(self, user: Auth)-> Auth:
         raise NotImplementedError
+    
+    def get_user_by_credentials(self,email)->Auth:
+        raise NotImplementedError

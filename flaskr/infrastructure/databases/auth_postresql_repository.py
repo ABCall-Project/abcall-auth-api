@@ -74,3 +74,26 @@ class AuthPostgresqlRepository(AuthRepository):
             password=model.password,
             salt=model.salt
         )
+    
+
+    def get_user_by_credentials(self,email)->Auth:
+        """
+            get user by user credentials
+            Args: 
+                email (str): users email
+                password (str): users password
+
+            Returns:
+                user (Auth): user instance
+        """
+        log.info(f'quering user by credentials {email}')
+        with self.session() as session:
+            try:
+                user=session.query(AuthUserModelSqlAlchemy).filter_by(email=email).first()
+                if user:
+                    log.info(f'user found {user}')
+                    return self._from_model(user)
+                else:
+                    return None
+            finally:
+                session.close()

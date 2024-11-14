@@ -39,3 +39,39 @@ class TestAuthPostgresqlRepository(unittest.TestCase):
         self.assertEqual(result[0].role_id, sample_role_id)
         self.mock_session_instance.query.assert_called_once_with(AuthUserModelSqlAlchemy)
         self.mock_session_instance.query().filter_by.assert_called_once_with(role_id=sample_role_id)
+
+
+
+    def test_get_user_by_credentials_found(self):
+        email = "john.doe@example.com"
+        mock_user = AuthUserModelSqlAlchemy(
+            id=uuid4(),
+            name="John",
+            last_name="Doe",
+            phone_number="1234567890",
+            email=email,
+            address="123 Main St",
+            birthdate=datetime(1990, 1, 1),
+            role_id="admin",
+            password="hashed_password"
+        )
+        self.mock_session_instance.query.return_value.filter_by.return_value.first.return_value = mock_user
+
+        result = self.repo.get_user_by_credentials(email)
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result.email, email)
+        self.assertEqual(result.name, "John")
+        self.mock_session_instance.query.assert_called_once_with(AuthUserModelSqlAlchemy)
+        self.mock_session_instance.query().filter_by.assert_called_once_with(email=email)
+
+    def test_get_user_by_credentials_not_found(self):
+        email = "non.existing@example.com"
+        self.mock_session_instance.query.return_value.filter_by.return_value.first.return_value = None
+
+        result = self.repo.get_user_by_credentials(email)
+
+        self.assertIsNone(result)
+        self.mock_session_instance.query.assert_called_once_with(AuthUserModelSqlAlchemy)
+        self.mock_session_instance.query().filter_by.assert_called_once_with(email=email)
+
