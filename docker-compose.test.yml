@@ -5,6 +5,7 @@ services:
       dockerfile: db.Dockerfile
     env_file:
       - .env.db
+    restart: always
     container_name: auth-test-db
     volumes:
       - "./data/postgresql-test:/var/lib/postgresql"
