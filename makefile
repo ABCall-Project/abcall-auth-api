@@ -55,7 +55,10 @@ docker-dev-down:
 
 docker-test-up:
 	docker compose -f=docker-compose.test.yml up --build -d
-	sleep 2
+	@until docker exec auth-test-db pg_isready -U develop; do \
+		echo "Waiting for PostgreSQL to start..."; \
+		sleep 2; \
+	done
 
 docker-test-down:
 	make docker-db-truncate
