@@ -55,6 +55,11 @@ docker-dev-down:
 
 docker-test-up:
 	docker compose -f=docker-compose.test.yml up --build -d
+	@echo "Waiting for PostgreSQL container to start..."
+	@until docker ps | grep 'auth-test-db'; do \
+		echo "Database container is still starting..."; \
+		sleep 2; \
+	done
 	@until docker exec auth-test-db pg_isready -U develop; do \
 		echo "Waiting for PostgreSQL to start..."; \
 		sleep 2; \
