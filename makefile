@@ -63,12 +63,12 @@ docker-test-down:
 	sleep 2
 
 create-database:
-	docker exec auth-local-test-db psql -U develop -d auth-db -f /docker-entrypoint-initdb.d/init.sql
+	docker exec auth-test-db psql -U develop -d auth-db -f /docker-entrypoint-initdb.d/init.sql
 
 docker-db-truncate:
-	docker exec auth-local-test-db psql -U develop -d auth-db  -c  "TRUNCATE TABLE role CASCADE;"
-	docker exec auth-local-test-db psql -U develop -d auth-db  -c  "TRUNCATE TABLE auth_user CASCADE;"
-	docker exec auth-local-test-db psql -U develop -d auth-db  -c  "TRUNCATE TABLE auth_user_customer CASCADE;"
+	docker exec auth-test-db  psql -U develop -d auth-db  -c  "TRUNCATE TABLE role CASCADE;"
+	docker exec auth-test-db psql -U develop -d auth-db  -c  "TRUNCATE TABLE auth_user CASCADE;"
+	docker exec auth-test-db psql -U develop -d auth-db  -c  "TRUNCATE TABLE auth_user_customer CASCADE;"
 
 
 kubernetes-up:
