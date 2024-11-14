@@ -88,12 +88,12 @@ class AuthUser(Resource):
                 password = data.get('password')
                 log.info(f'Receive request to get user by credentials {email}')
                 user = self.service.get_user_by_credentials(email,password)
-                if user:
+                company=None
+                user_company = self.service.get_company_by_user(user.id)
+                    
+                if user and user_company:
                     #quering company by user
-                    company=None
-                    user_company = self.service.get_company_by_user(user.id)
-                    if user_company:
-                        company=user_company.customer_id
+                    company=user_company.customer_id
 
                     return {
                         "id": str(user.id),
