@@ -1,5 +1,6 @@
 import unittest
-from unittest.mock import MagicMock, patch
+import os
+from unittest.mock import MagicMock, patch, Mock
 from faker import Faker
 from flaskr.application.auth_service import AuthService
 from flaskr.domain.interfaces.AuthRepository import AuthRepository
@@ -7,14 +8,17 @@ from flaskr.domain.interfaces.AuthUserCustomerRepository import AuthUserCustomer
 from builder.AuthBuilder import AuthBuilder
 from mocks.repositories.auth_mock_repository import AuthMockRepository
 from mocks.repositories.auth_customer_mock_repository import AuthCustomerMockRepository
+from config import Config
 from flaskr.domain.models import Auth
+from flaskr.utils.encryption import generate_key_from_phrase, encrypt_data, base64_decode, encrypt_data_with_passphrase, base64_encode
 
 
 class AuthServiceTestCase(unittest.TestCase):
     def setUp(self):
 
-        self.mock_auth_repository = MagicMock(spec=AuthRepository)
+        self.mock_auth_repository = Mock(spec=AuthRepository)
         self.mock_auth_user_customer_repository = MagicMock(spec=AuthUserCustomerRepository)
+        self.config = Config()
         
 
         self.auth_service = AuthService(
@@ -83,48 +87,41 @@ class AuthServiceTestCase(unittest.TestCase):
             warn_mock.assert_any_call(message_expected)
 
 
-    @patch('flaskr.application.auth_service.bcrypt.checkpw')
-    def test_get_user_by_credentials_success(self, mock_checkpw):
+    def test_get_user_by_credentials_success(self):
         email = "test@example.com"
         password = "password123"
-        hashed_password = "$2b$12$abcdefghijklmnopqrstuv"  
+        salt = os.urandom(16)
+        key = generate_key_from_phrase(self.config.PHRASE_KEY, salt)
+        password_encrypt = encrypt_data(password,key)
+        salt_decode = base64_encode(salt)
+        user = AuthBuilder() \
+            .with_password(password_encrypt) \
+            .with_salt(salt_decode) \
+            .build()
+        self.mock_auth_repository.get_user_by_credentials.return_value = user
+        password_sent = encrypt_data_with_passphrase(password, self.config.PHRASE_KEY)
+        password_sent_decode = base64_encode(password_sent)
 
-        mock_user = MagicMock(spec=Auth)
-        mock_user.password = hashed_password
-        self.mock_auth_repository.get_user_by_credentials.return_value = mock_user
-        mock_checkpw.return_value = True
+        result = self.auth_service.get_user_by_credentials(email, password_sent_decode)
 
-        result = self.auth_service.get_user_by_credentials(email, password)
-        self.assertEqual(result, mock_user)
-        self.mock_auth_repository.get_user_by_credentials.assert_called_once_with(email=email)
-        mock_checkpw.assert_called_once_with(password.encode('utf-8'), hashed_password.encode('utf-8'))
-
-    @patch('flaskr.application.auth_service.bcrypt.checkpw')
-    def test_get_user_by_credentials_invalid_password(self, mock_checkpw):
+        self.assertEqual(result, user)
+ 
+    def test_get_user_by_credentials_invalid_password(self):
         email = "test@example.com"
         password = "wrong_password"
-        hashed_password = "$2b$12$abcdefghijklmnopqrstuv"
-
-        mock_user = MagicMock(spec=Auth)
-        mock_user.password = hashed_password
-        self.mock_auth_repository.get_user_by_credentials.return_value = mock_user
-        mock_checkpw.return_value = False
-
-        result = self.auth_service.get_user_by_credentials(email, password)
-        self.assertIsNone(result)
-        mock_checkpw.assert_called_once_with(password.encode('utf-8'), hashed_password.encode('utf-8'))
-
-    def test_hash_password(self):
-        password = "password123"
-        hashed_password = self.auth_service._AuthService__hash_password(password)
-
-        self.assertIsInstance(hashed_password, str)
-        self.assertTrue(hashed_password.startswith("$2b$"))
-
-    @patch('flaskr.application.auth_service.bcrypt.checkpw')
-    def test_check_password(self, mock_checkpw):
-        password = "password123"
-        hashed_password = "$2b$12$abcdefghijklmnopqrstuv"
+        real_password = "password123"
+        salt = os.urandom(16)
+        key = generate_key_from_phrase(self.config.PHRASE_KEY, salt)
+        password_encrypt = encrypt_data(real_password,key)
+        salt_decode = base64_encode(salt)
+        user = AuthBuilder() \
+            .with_password(password_encrypt) \
+            .with_salt(salt_decode) \
+            .build()
+        self.mock_auth_repository.get_user_by_credentials.return_value = user
+        password_sent = encrypt_data_with_passphrase(password, self.config.PHRASE_KEY)
+        password_sent_decode = base64_encode(password_sent)
         
-        self.auth_service._AuthService__check_password(password, hashed_password)
-        mock_checkpw.assert_called_once_with(password.encode('utf-8'), hashed_password.encode('utf-8'))
+        result = self.auth_service.get_user_by_credentials(email, password_sent_decode)
+        
+        self.assertIsNone(result)

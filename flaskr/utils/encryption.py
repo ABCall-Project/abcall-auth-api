@@ -16,6 +16,28 @@ def generate_key_from_phrase(phrase: str, salt: bytes) -> bytes:
     key = base64.urlsafe_b64encode(kdf.derive(phrase.encode()))
     return key
 
+def derive_key_from_passphrase(passphrase: str):
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=b"",
+        iterations=100000,
+    )
+    key = base64.urlsafe_b64encode(kdf.derive(passphrase.encode()))
+    return key
+
+def encrypt_data_with_passphrase(data: str, passphrase: str):
+    key = derive_key_from_passphrase(passphrase)
+    fernet = Fernet(key)
+    encrypted_data = fernet.encrypt(data.encode())
+    return encrypted_data
+
+def decrypt_data_with_passphrase(encrypted_data: bytes, passphrase: str):
+    key = derive_key_from_passphrase(passphrase)
+    fernet = Fernet(key)
+    decrypted_data = fernet.decrypt(encrypted_data)
+    return decrypted_data.decode()
+
 def encrypt_data(data: str, key: bytes) -> str:
     fernet = Fernet(key)
     encrypted_data = fernet.encrypt(data.encode())
