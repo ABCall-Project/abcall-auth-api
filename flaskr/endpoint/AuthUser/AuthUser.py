@@ -85,9 +85,24 @@ class AuthUser(Resource):
                 password = data.get('password')
                 log.info(f'Receive request to get user by credentials {email}')
                 user = self.service.get_user_by_credentials(email,password)
-                if user:
-                    user_s=user.to_dict()
-                    return user_s, HTTPStatus.OK
+                company=None
+                user_company = self.service.get_company_by_user(user.id)
+                    
+                if user and user_company:
+                    #quering company by user
+                    company=user_company.customer_id
+
+                    return {
+                        "id": str(user.id),
+                        "name": user.name,
+                        "last_name": user.last_name,
+                        "phone_number": user.phone_number,
+                        "email": user.email,
+                        "address": user.address,
+                        "birthdate": user.birthdate.strftime("%Y-%m-%d") if user.birthdate else None,
+                        "role_id": str(user.role_id),
+                        "customer_id":str(company)
+                    }, HTTPStatus.OK
                 else:
                     return None, HTTPStatus.NOT_FOUND
             else:
