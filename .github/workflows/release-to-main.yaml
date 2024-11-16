@@ -60,6 +60,8 @@ jobs:
           ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
           AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
           DATABASE_URI: ${{ secrets.DATABASE_URI }}
+          PHRASE_KEY: ${{ secrets.PHRASE_KEY }}
+          
         run: |
           echo "Environment variables are set"
         
@@ -80,6 +82,7 @@ jobs:
       - name: Deploy to AKS 🚀
         run: |
           DATABASE_URI="${{ secrets.DATABASE_URI }}"
+          PHRASE_KEY="${{ secrets.PHRASE_KEY }}"
           sed "s/{{IMAGE_TAG}}/build-${GITHUB_RUN_NUMBER}/g" ./kubernetes/k8s-deployment.tmpl > kubernetes/new-k8s-deployment.yaml
           sed -e "s|{{DATABASE_URI}}|${DATABASE_URI}|g" \
           sed -e "s|{{PHRASE_KEY}}|${PHRASE_KEY}|g" \
