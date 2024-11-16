@@ -3,7 +3,7 @@ activate:
         echo "Python 🐍 environment was activated"; \
     else \
         echo "The folder environment doesn't exist"; \
-		python -m venv venv; \
+		python3 -m venv venv; \
         echo "The environment folder was created and the python 🐍 environment was activated"; \
     fi
 	. ./venv/bin/activate
@@ -26,13 +26,17 @@ else
 endif
 
 run-tests:
-	 FLASK_ENV=test python -m unittest discover -s tests -p '*Test.py' -v
+	make docker-test-up
+	FLASK_ENV=test python -m unittest discover -s tests -p '*Test.py' -v
+	make docker-test-down
 
 run-tests-coverage:
+	make docker-test-up
 	FLASK_ENV=test coverage run -m unittest discover -s tests -p '*Test.py' -v
-	 coverage report -m
-	 coverage html
-	 coverage report --fail-under=80
+	coverage report -m
+	coverage html
+	coverage report --fail-under=80
+	make docker-test-down
 	 
 docker-gunicorn:
 	  gunicorn -w 4 --bind 127.0.0.1:$(PORT) wsgi:app
@@ -49,8 +53,30 @@ docker-dev-up:
 docker-dev-down:
 	docker compose -f=docker-compose.develop.yml down
 
+docker-test-up:
+	docker compose -f=docker-compose.test.yml up --build -d
+	@echo "Waiting for PostgreSQL container to start..."
+	@until docker ps | grep 'auth-test-db'; do \
+		echo "Database container is still starting..."; \
+		sleep 2; \
+	done
+	@until docker exec auth-test-db pg_isready -U develop; do \
+		echo "Waiting for PostgreSQL to start..."; \
+		sleep 2; \
+	done
+
+docker-test-down:
+	make docker-db-truncate
+	docker compose -f=docker-compose.test.yml down
+	sleep 2
+
 create-database:
-	docker exec auth-local-db psql -U develop -d auth-db -f /docker-entrypoint-initdb.d/init.sql
+	docker exec auth-test-db psql -U develop -d auth-db -f /docker-entrypoint-initdb.d/init.sql
+
+docker-db-truncate:
+	docker exec auth-test-db psql -U develop -d auth-db  -c  "TRUNCATE TABLE role CASCADE;"
+	docker exec auth-test-db psql -U develop -d auth-db  -c  "TRUNCATE TABLE auth_user CASCADE;"
+	docker exec auth-test-db psql -U develop -d auth-db  -c  "TRUNCATE TABLE auth_user_customer CASCADE;"
 
 
 kubernetes-up:

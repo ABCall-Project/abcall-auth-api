@@ -10,19 +10,14 @@ from flaskr.infrastructure.databases.model_sqlalchemy import AuthUserModelSqlAlc
 
 class TestAuthPostgresqlRepository(unittest.TestCase):
 
-    @patch('flaskr.infrastructure.databases.auth_postresql_repository.create_engine')
-    @patch('flaskr.infrastructure.databases.auth_postresql_repository.sessionmaker')
-    def setUp(self, mock_sessionmaker, mock_create_engine):
-        self.mock_engine = MagicMock()
-        mock_create_engine.return_value = self.mock_engine
+    @patch('flaskr.infrastructure.databases.auth_postresql_repository.engine')
+    @patch('flaskr.infrastructure.databases.auth_postresql_repository.Session')
+    def setUp(self, mock_session, mock_engine):
+        mock_engine.return_value = mock_engine
 
-        self.mock_session = MagicMock()
-        self.mock_session_instance = MagicMock()
-        self.mock_session.return_value = self.mock_session_instance
-        mock_sessionmaker.return_value = self.mock_session
+        self.mock_session_instance = mock_session.return_value.__enter__.return_value
 
-        self.repo = AuthPostgresqlRepository('mock_connection_string')
-        self.repo.Session = self.mock_session
+        self.repo = AuthPostgresqlRepository()
 
     def test_list_users_by_role(self):
         sample_role_id = "admin"

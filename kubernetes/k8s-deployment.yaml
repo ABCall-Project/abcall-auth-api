@@ -41,6 +41,11 @@ spec:
                 secretKeyRef:
                   name: auth-secrets
                   key: DATABASE_URI
+            - name: "PHRASE_KEY"
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secrets
+                  key: PHRASE_KEY
           ports:
             - containerPort: 3004
           imagePullPolicy: Always

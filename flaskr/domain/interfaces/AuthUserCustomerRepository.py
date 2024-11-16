@@ -8,3 +8,6 @@ class AuthUserCustomerRepository:
     
     def get_company_by_user(self,user_id) -> AuthUserCustomer:
         raise NotImplementedError
+    
+    def create(self, user:AuthUserCustomer) -> AuthUserCustomer:
+        raise NotImplementedError

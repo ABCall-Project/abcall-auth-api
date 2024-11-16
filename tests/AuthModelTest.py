@@ -15,7 +15,8 @@ class TestAuth(unittest.TestCase):
             email="john.doe@example.com",
             address="123 Main St",
             birthdate=datetime(1990, 1, 1),
-            role_id="admin"
+            role_id="admin",
+            password= "password"
         )
 
     def test_init(self):
@@ -38,7 +39,9 @@ class TestAuth(unittest.TestCase):
             'email': "john.doe@example.com",
             'address': "123 Main St",
             'birthdate': "1990-01-01",
-            'role_id': "admin"
+            'role_id': "admin",
+            "password": "password",
+            "salt": None
         }
         self.assertEqual(result, expected_dict)
 

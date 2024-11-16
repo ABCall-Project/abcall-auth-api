@@ -12,3 +12,5 @@ marshmallow-sqlalchemy==0.29.0
 kombu==5.4.2
 coverage==5.3
 Flask-Cors==5.0.0
+cryptography==43.0.3
+Faker

@@ -15,9 +15,8 @@ log = Logger()
 class AuthUser(Resource):
 
     def __init__(self):
-        config = Config()
-        self.auth_user_customer_repository = AuthCustomerPostgresqlRepository(config.DATABASE_URI)
-        self.auth_repository = AuthPostgresqlRepository(config.DATABASE_URI)
+        self.auth_user_customer_repository = AuthCustomerPostgresqlRepository()
+        self.auth_repository = AuthPostgresqlRepository()
         self.service = AuthService(self.auth_repository, self.auth_user_customer_repository)
 
 
@@ -73,8 +72,6 @@ class AuthUser(Resource):
             if user_company:
                 user_company_s=user_company.to_dict()
                 return user_company_s, HTTPStatus.OK
-            else:
-                return None, HTTPStatus.OK
         except Exception as ex:
             log.error(f'Some error occurred trying to get the data company by user: {ex}')
             return {'message': 'Something was wrong trying to get data company by user'}, HTTPStatus.INTERNAL_SERVER_ERROR

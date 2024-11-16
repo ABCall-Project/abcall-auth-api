@@ -1,4 +1,4 @@
-FROM python:alpine3.11 AS python-base
+FROM python:alpine3.16 AS python-base
 
 WORKDIR /app
 
@@ -10,6 +10,8 @@ RUN apk add --no-cache \
     nginx \
     openssl-dev \
     make
+
+RUN apk add --no-cache cargo
 
 COPY requirements.txt ./
 RUN pip install --upgrade pip
