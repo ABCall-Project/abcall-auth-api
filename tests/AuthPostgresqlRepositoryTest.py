@@ -21,6 +21,10 @@ class TestAuthPostgresqlRepository(unittest.TestCase):
 
     def test_list_users_by_role(self):
         sample_role_id = "admin"
+        sample_page = 1
+        sample_limit = 10  # mock limit, it must be a valid integer to avoid division by None
+
+        # Create a mock user to return in the query
         mock_user = AuthUserModelSqlAlchemy(
             id=uuid4(),
             name="John",
@@ -31,18 +35,29 @@ class TestAuthPostgresqlRepository(unittest.TestCase):
             birthdate=datetime(1990, 1, 1),
             role_id=sample_role_id
         )
-        self.mock_session_instance.query.return_value.filter_by.return_value.all.return_value = [mock_user]
+
+        # Mock the session query and count
+        mock_session = self.mock_session_instance
+        mock_session.query.return_value.filter.return_value.filter_by.return_value.count.return_value = 5  # mock total items (e.g., 5 users)
         
-        total_pages_mock = 1  
-        self.repo.get_total_pages = MagicMock(return_value=total_pages_mock)
+        # Mock query to return a list of users
+        mock_session.query.return_value.filter_by.return_value.all.return_value = [mock_user]
+        
+        # Call the method under test
+        result = self.repo.list_users_by_role(sample_role_id, page=sample_page, limit=sample_limit)
 
-        result = self.repo.list_users_by_role(sample_role_id)
+        # Assertions
+        self.assertEqual(len(result["data"]), 1)  # One user returned in the list
+        self.assertEqual(result["data"][0]["role_id"], sample_role_id)  # The role_id matches
+        self.assertEqual(result["total_pages"], 1)  # With 5 users and a limit of 10, total pages should be 1
+        self.assertEqual(result["has_next"], False)  # No next page since total pages is 1
 
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0].role_id, sample_role_id)
-        self.mock_session_instance.query.assert_called_once_with(AuthUserModelSqlAlchemy)
-        self.mock_session_instance.query().filter_by.assert_called_once_with(role_id=sample_role_id)
-        self.repo.get_total_pages.assert_called_once()
+        # Check if the session's query methods were called as expected
+        mock_session.query.assert_called_once_with(AuthUserModelSqlAlchemy)
+        mock_session.query().filter.assert_called_once_with(AuthUserModelSqlAlchemy.role_id == sample_role_id)
+        mock_session.query().filter().count.assert_called_once()  # Verify count was called to get total_items
+        mock_session.query().filter().all.assert_called_once()  # Verify all() was called to get the list of users
+
 
 
 
