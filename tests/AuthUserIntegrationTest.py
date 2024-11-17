@@ -93,7 +93,7 @@ class AuthUserIntegrationTestCase(unittest.TestCase):
         auth = AuthBuilder().with_role_id(role.id).build()
         self.add_auth_user(auth)
 
-        response = self.client.get(f'/users/getUsersByRole?role_id={role.id}', content_type='application/json')
+        response = self.client.get(f'/users/getUsersByRole?role_id={role.id}&page=1&limit=5', content_type='application/json')
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
