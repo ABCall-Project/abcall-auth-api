@@ -32,6 +32,9 @@ class TestAuthPostgresqlRepository(unittest.TestCase):
             role_id=sample_role_id
         )
         self.mock_session_instance.query.return_value.filter_by.return_value.all.return_value = [mock_user]
+        
+        total_pages_mock = 1  
+        self.repo.get_total_pages = MagicMock(return_value=total_pages_mock)
 
         result = self.repo.list_users_by_role(sample_role_id)
 
@@ -39,6 +42,8 @@ class TestAuthPostgresqlRepository(unittest.TestCase):
         self.assertEqual(result[0].role_id, sample_role_id)
         self.mock_session_instance.query.assert_called_once_with(AuthUserModelSqlAlchemy)
         self.mock_session_instance.query().filter_by.assert_called_once_with(role_id=sample_role_id)
+        self.repo.get_total_pages.assert_called_once()
+
 
 
 
