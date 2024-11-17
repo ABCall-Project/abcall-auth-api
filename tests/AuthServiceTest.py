@@ -61,7 +61,7 @@ class AuthServiceTestCase(unittest.TestCase):
 
         result = self.auth_service.list_users_by_role(role_id, page=1, limit=10)
         self.assertEqual(result, expected_data)
-        self.mock_auth_repository.list_users_by_role.assert_called_once_with(role_id,1,10)
+        self.mock_auth_repository.list_users_by_role.assert_called_once_with(role_id,page=1, limit=10)
 
     def test_get_company_by_user(self):
         user_id = 3
