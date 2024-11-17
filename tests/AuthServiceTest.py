@@ -39,11 +39,28 @@ class AuthServiceTestCase(unittest.TestCase):
     def test_list_users_by_role(self):
 
         role_id = 2
-        expected_users = ["user3", "user4"]
-        self.mock_auth_repository.list_users_by_role.return_value = expected_users
+        expected_data = {
+                    "page": 1,
+                    "limit": 5,
+                    "total_pages": 1,
+                    "has_next": False,
+                    "data": [
+                        {
+                            "id": "090b9b2f-c79c-41c1-944b-9d57cca4d582",
+                            "name": "MIGUEL",
+                            "last_name": "TOVAR",
+                            "phone_number": "55555555",
+                            "email": "miguel@yopmail.com",
+                            "address": "Calle luna",
+                            "birthdate": "1983-05-23 00:00:00+00:00",
+                            "role_id": "beaa72b1-a7d3-4035-b4b3-bba0cd0c4d5d"
+                        }
+                    ]
+                }
+        self.mock_auth_repository.list_users_by_role.return_value = expected_data
 
         result = self.auth_service.list_users_by_role(role_id)
-        self.assertEqual(result, expected_users)
+        self.assertEqual(result, expected_data)
         self.mock_auth_repository.list_users_by_role.assert_called_once_with(role_id)
 
     def test_get_company_by_user(self):
