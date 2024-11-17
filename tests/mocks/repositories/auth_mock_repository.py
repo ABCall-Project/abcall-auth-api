@@ -8,7 +8,7 @@ class AuthMockRepository(AuthRepository):
         super().__init__()
         self.users = userMock
 
-    def list_users_by_role(self, role_id) -> List[Auth]:
+    def list_users_by_role(self, role_id):
         return [user for user in self.users if user.role_id == role_id]
 
     def create(self, user:Auth) -> Auth:

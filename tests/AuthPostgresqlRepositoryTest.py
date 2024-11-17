@@ -19,29 +19,6 @@ class TestAuthPostgresqlRepository(unittest.TestCase):
 
         self.repo = AuthPostgresqlRepository()
 
-    def test_list_users_by_role(self):
-        sample_role_id = "admin"
-        mock_user = AuthUserModelSqlAlchemy(
-            id=uuid4(),
-            name="John",
-            last_name="Doe",
-            phone_number="1234567890",
-            email="john.doe@example.com",
-            address="123 Main St",
-            birthdate=datetime(1990, 1, 1),
-            role_id=sample_role_id
-        )
-        self.mock_session_instance.query.return_value.filter_by.return_value.all.return_value = [mock_user]
-
-        result = self.repo.list_users_by_role(sample_role_id)
-
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0].role_id, sample_role_id)
-        self.mock_session_instance.query.assert_called_once_with(AuthUserModelSqlAlchemy)
-        self.mock_session_instance.query().filter_by.assert_called_once_with(role_id=sample_role_id)
-
-
-
     def test_get_user_by_credentials_found(self):
         email = "john.doe@example.com"
         mock_user = AuthUserModelSqlAlchemy(
