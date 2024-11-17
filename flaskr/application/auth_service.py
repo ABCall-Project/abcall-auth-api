@@ -1,5 +1,6 @@
 from flask import jsonify
 from typing import List
+from uuid import UUID
 from ..utils.logger import Logger
 from ..domain.models import Auth, AuthUserCustomer
 from ..domain.interfaces.AuthRepository import AuthRepository
@@ -18,9 +19,12 @@ class AuthService:
     def list_users_by_customer(self,customer_id):
         return self.auth_user_customer_repository.list_users_by_customer(customer_id)
 
-    def list_users_by_role(self,role_id):
+    def list_users_by_role(self,role_id: UUID,page: int, limit: int):
         self.log.info('Receive AuthService list_users_by_role')
-        return self.auth_repository.list_users_by_role(role_id)
+        if not role_id:
+            raise ValueError("All fields are required to get an user.")
+        return self.auth_repository.list_users_by_role(role_id,page=page,
+                    limit=limit)
     
     def get_company_by_user(self,user_id):
          self.log.info('returning  company by user id')

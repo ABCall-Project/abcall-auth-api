@@ -54,11 +54,12 @@ class AuthUser(Resource):
 
         try:
             role_id = request.args.get('role_id')
+            page = int(request.args.get('page'))
+            limit = int(request.args.get('limit'))
             log.info(f'Receive request to get users by role {role_id}')
-            user_list = self.service.list_users_by_role(role_id)
-            list_user = [users.to_dict() for users in user_list]
+            user_list = self.service.list_users_by_role(role_id, page=page,limit=limit)
             
-            return list_user, HTTPStatus.OK
+            return user_list, HTTPStatus.OK
         except Exception as ex:
             log.error(f'Some error occurred trying to get the data from {role_id}: {ex}')
             return {'message': 'Something was wrong trying to get rate by role data'}, HTTPStatus.INTERNAL_SERVER_ERROR
