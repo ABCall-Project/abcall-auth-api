@@ -5,7 +5,7 @@ from ..utils.logger import Logger
 from ..domain.models import Auth, AuthUserCustomer
 from ..domain.interfaces.AuthRepository import AuthRepository
 from ..domain.interfaces.AuthUserCustomerRepository import AuthUserCustomerRepository
-from flaskr.utils.encryption import base64_decode, generate_key_from_phrase, decrypt_data, decrypt_data_with_passphrase, base64_encode
+from flaskr.utils.encryption import base64_decode, generate_key_from_phrase, decrypt_data, verify_hash
 
 from config import Config
 
@@ -66,9 +66,7 @@ class AuthService:
         """
         Verifica si la contraseña proporcionada coincide con el hash almacenado.
         """
-        salt_decode = base64_decode(user.salt)
-        key = generate_key_from_phrase(self.config.PHRASE_KEY, salt_decode)
-        password_decode = base64_decode(password)
-        password_decrypt = decrypt_data_with_passphrase(password_decode, self.config.PHRASE_KEY)
+        key = generate_key_from_phrase(self.config.PHRASE_KEY, base64_decode(user.salt))
         password_stored_decrypt = decrypt_data(user.password, key)
-        return password_decrypt == password_stored_decrypt
+
+        return verify_hash(password_stored_decrypt, self.config.PHRASE_KEY, password)

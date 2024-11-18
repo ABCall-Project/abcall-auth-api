@@ -10,7 +10,7 @@ from mocks.repositories.auth_mock_repository import AuthMockRepository
 from mocks.repositories.auth_customer_mock_repository import AuthCustomerMockRepository
 from config import Config
 from flaskr.domain.models import Auth
-from flaskr.utils.encryption import generate_key_from_phrase, encrypt_data, base64_decode, encrypt_data_with_passphrase, base64_encode
+from flaskr.utils.encryption import generate_key_from_phrase, encrypt_data, base64_encode, hash_password
 
 
 class AuthServiceTestCase(unittest.TestCase):
@@ -116,10 +116,9 @@ class AuthServiceTestCase(unittest.TestCase):
             .with_salt(salt_decode) \
             .build()
         self.mock_auth_repository.get_user_by_credentials.return_value = user
-        password_sent = encrypt_data_with_passphrase(password, self.config.PHRASE_KEY)
-        password_sent_decode = base64_encode(password_sent)
+        password_sent = hash_password(password, self.config.PHRASE_KEY)
 
-        result = self.auth_service.get_user_by_credentials(email, password_sent_decode)
+        result = self.auth_service.get_user_by_credentials(email, password_sent)
 
         self.assertEqual(result, user)
  
@@ -136,9 +135,8 @@ class AuthServiceTestCase(unittest.TestCase):
             .with_salt(salt_decode) \
             .build()
         self.mock_auth_repository.get_user_by_credentials.return_value = user
-        password_sent = encrypt_data_with_passphrase(password, self.config.PHRASE_KEY)
-        password_sent_decode = base64_encode(password_sent)
+        password_sent = hash_password(password, self.config.PHRASE_KEY)
         
-        result = self.auth_service.get_user_by_credentials(email, password_sent_decode)
+        result = self.auth_service.get_user_by_credentials(email, password_sent)
         
         self.assertIsNone(result)

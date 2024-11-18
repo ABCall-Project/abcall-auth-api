@@ -49,8 +49,6 @@ class UserIntegrationTestCase(unittest.TestCase):
             'password': fake.password()
         }
 
-        print(data)
-
         response = self.client.post('/user', data=data)
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
