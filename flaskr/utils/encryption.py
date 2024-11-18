@@ -2,8 +2,9 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.fernet import Fernet
+import hmac
+import hashlib
 import base64
-import os
 
 def generate_key_from_phrase(phrase: str, salt: bytes) -> bytes:
     kdf = PBKDF2HMAC(
@@ -16,27 +17,18 @@ def generate_key_from_phrase(phrase: str, salt: bytes) -> bytes:
     key = base64.urlsafe_b64encode(kdf.derive(phrase.encode()))
     return key
 
-def derive_key_from_passphrase(passphrase: str):
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=b"",
-        iterations=100000,
-    )
-    key = base64.urlsafe_b64encode(kdf.derive(passphrase.encode()))
-    return key
+def hash_password(password: str, phrase: str) -> str:
+    phrase_bytes = phrase.encode('utf-8')
+    password_bytes = password.encode('utf-8')
 
-def encrypt_data_with_passphrase(data: str, passphrase: str):
-    key = derive_key_from_passphrase(passphrase)
-    fernet = Fernet(key)
-    encrypted_data = fernet.encrypt(data.encode())
-    return encrypted_data
+    hashed = hmac.new(phrase_bytes, password_bytes, hashlib.sha256)
 
-def decrypt_data_with_passphrase(encrypted_data: bytes, passphrase: str):
-    key = derive_key_from_passphrase(passphrase)
-    fernet = Fernet(key)
-    decrypted_data = fernet.decrypt(encrypted_data)
-    return decrypted_data.decode()
+    return base64.b64encode(hashed.digest()).decode('utf-8')
+
+def verify_hash(password:str, phrase:str, expected_hash: str)->bool:
+    computed_hash = hash_password(password, phrase)
+
+    return computed_hash == expected_hash
 
 def encrypt_data(data: str, key: bytes) -> str:
     fernet = Fernet(key)

@@ -14,3 +14,4 @@ coverage==5.3
 Flask-Cors==5.0.0
 cryptography==43.0.3
 Faker
+pycryptodome==3.21.0
