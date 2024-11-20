@@ -10,7 +10,7 @@ from ...infrastructure.databases.auth_users_customer_postgresql_repository impor
 from ...infrastructure.databases.auth_postresql_repository import AuthPostgresqlRepository
 from ...utils import Logger
 from .validation_user import validate_user
-from flaskr.utils.encryption import generate_key_from_phrase, encrypt_data, base64_encode
+from flaskr.utils.encryption import generate_key_from_phrase, encrypt_data, base64_encode, decrypt_data_with_phrase
 from flaskr.domain.models import Auth
 
 from config import Config
@@ -36,7 +36,7 @@ class User(MethodView):
             birthdate = request.form.get('birthdate')
             role_id = request.form.get('role_id')
             customer_id = request.form.get('customer_id')
-            password = request.form.get('password')
+            password = decrypt_data_with_phrase(request.form.get('password'), self.config.PHRASE_KEY)
 
             salt = os.urandom(16)
             key = generate_key_from_phrase(self.config.PHRASE_KEY, salt)

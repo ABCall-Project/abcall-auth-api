@@ -2,9 +2,16 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.fernet import Fernet
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import unpad
+from Crypto.Random import get_random_bytes
 import hmac
 import hashlib
+from hashlib import sha256
 import base64
+from flaskr.utils import Logger
+
+log = Logger()
 
 def generate_key_from_phrase(phrase: str, salt: bytes) -> bytes:
     kdf = PBKDF2HMAC(
@@ -39,6 +46,23 @@ def decrypt_data(encrypted_data: str, key: bytes) -> str:
     fernet = Fernet(key)
     decrypted_data = fernet.decrypt(encrypted_data.encode())
     return decrypted_data.decode()
+
+def decrypt_data_with_phrase(encrypted_data: str, phrase: str)->str:
+    try:
+        key = hashlib.sha256(phrase.encode('utf-8')).digest()
+        iv_base64, ciphertext_base64 = encrypted_data.split(":")
+        iv = base64.b64decode(iv_base64)
+        ciphertext = base64.b64decode(ciphertext_base64)
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        decrypted_data = unpad(cipher.decrypt(ciphertext), AES.block_size)
+        return decrypted_data.decode('utf-8')
+    except ValueError as ex:
+        log.error(f"Decryption error: {ex}")
+        raise ex
+    except Exception as ex:
+        log.error(f'Some error ocurred trying to decrypt the data {ex}')
+        raise ex
+
 
 def validate_cipher(encrypted_data: str, original_data: str, key: bytes) -> bool:
     try:
