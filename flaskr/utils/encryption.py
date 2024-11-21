@@ -3,8 +3,9 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.fernet import Fernet
 from Crypto.Cipher import AES
-from Crypto.Util.Padding import unpad
+from Crypto.Util.Padding import unpad, pad
 from Crypto.Random import get_random_bytes
+import os
 import hmac
 import hashlib
 from hashlib import sha256
@@ -63,6 +64,19 @@ def decrypt_data_with_phrase(encrypted_data: str, phrase: str)->str:
         log.error(f'Some error ocurred trying to decrypt the data {ex}')
         raise ex
 
+def encrypt_data_with_phrase(data: str, phrase: str) -> str:
+    try:
+        key = hashlib.sha256(phrase.encode('utf-8')).digest()
+        iv = os.urandom(AES.block_size)
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        padded_data = pad(data.encode('utf-8'), AES.block_size)
+        encrypted_data = cipher.encrypt(padded_data)
+        iv_base64 = base64.b64encode(iv).decode('utf-8')
+        ciphertext_base64 = base64.b64encode(encrypted_data).decode('utf-8')
+        return f"{iv_base64}:{ciphertext_base64}"
+    except Exception as ex:
+        log.error(f"Unexpected error during encryption: {ex}")
+        raise ex
 
 def validate_cipher(encrypted_data: str, original_data: str, key: bytes) -> bool:
     try:
