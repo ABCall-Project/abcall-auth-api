@@ -10,19 +10,15 @@ from flaskr.infrastructure.databases.model_sqlalchemy import AuthUserCustomerMod
 
 class TestAuthCustomerPostgresqlRepository(unittest.TestCase):
 
-    @patch('flaskr.infrastructure.databases.auth_users_customer_postgresql_repository.create_engine')
-    @patch('flaskr.infrastructure.databases.auth_users_customer_postgresql_repository.sessionmaker')
-    def setUp(self, mock_sessionmaker, mock_create_engine):
-        self.mock_engine = MagicMock()
-        mock_create_engine.return_value = self.mock_engine
+    @patch('flaskr.infrastructure.databases.auth_users_customer_postgresql_repository.engine')
+    @patch('flaskr.infrastructure.databases.auth_users_customer_postgresql_repository.Session')
+    def setUp(self, mock_session, mock_engine):
+        self.mock_engine = mock_engine
+        mock_engine.return_value = self.mock_engine
 
-        self.mock_session = MagicMock()
-        self.mock_session_instance = MagicMock()
-        self.mock_session.return_value = self.mock_session_instance
-        mock_sessionmaker.return_value = self.mock_session
+        self.mock_session_instance = mock_session.return_value.__enter__.return_value
 
-        self.repo = AuthCustomerPostgresqlRepository('mock_connection_string')
-        self.repo.Session = self.mock_session
+        self.repo = AuthCustomerPostgresqlRepository()
 
     def test_list_users_by_customer(self):
         sample_customer_id = uuid4()
@@ -65,4 +61,38 @@ class TestAuthCustomerPostgresqlRepository(unittest.TestCase):
         self.assertIsNone(result)
         self.mock_session_instance.query.assert_called_once_with(AuthUserCustomerModelSqlAlchemy)
         self.mock_session_instance.query().filter_by.assert_called_once_with(auth_user_id=sample_user_id)
+
+    def test_from_model(self):
+        # Prueba del método privado _from_model para asegurar que convierte correctamente
+        model_instance = AuthUserCustomerModelSqlAlchemy(
+            id=uuid4(),
+            auth_user_id=uuid4(),
+            customer_id=uuid4()
+        )
+        result = self.repo._from_model(model_instance)
+
+        self.assertIsInstance(result, AuthUserCustomer)
+        self.assertEqual(result.id, model_instance.id)
+        self.assertEqual(result.auth_user_id, model_instance.auth_user_id)
+        self.assertEqual(result.customer_id, model_instance.customer_id)
+
+    @patch('flaskr.infrastructure.databases.auth_users_customer_postgresql_repository.AuthUserCustomerModelSqlAlchemy')
+    def test_list_users_by_customer_exception(self, mock_model):
+        # Simula una excepción al listar usuarios por cliente
+        self.mock_session_instance.query.side_effect = Exception("Database error")
+
+        with self.assertRaises(Exception) as context:
+            self.repo.list_users_by_customer(uuid4())
+
+        self.assertTrue("Database error" in str(context.exception))
+
+    @patch('flaskr.infrastructure.databases.auth_users_customer_postgresql_repository.AuthUserCustomerModelSqlAlchemy')
+    def test_get_company_by_user_exception(self, mock_model):
+        # Simula una excepción al obtener la compañía por usuario
+        self.mock_session_instance.query.side_effect = Exception("Database error")
+
+        with self.assertRaises(Exception) as context:
+            self.repo.get_company_by_user(uuid4())
+
+        self.assertTrue("Database error" in str(context.exception))
 
