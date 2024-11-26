@@ -85,7 +85,7 @@ jobs:
           PHRASE_KEY="${{ secrets.PHRASE_KEY }}"
           sed "s/{{IMAGE_TAG}}/build-${GITHUB_RUN_NUMBER}/g" ./kubernetes/k8s-deployment.tmpl > kubernetes/new-k8s-deployment.yaml
           sed -e "s|{{DATABASE_URI}}|${DATABASE_URI}|g" \
-          sed -e "s|{{PHRASE_KEY}}|${PHRASE_KEY}|g" \
+          -e "s|{{PHRASE_KEY}}|${PHRASE_KEY}|g" \
           ./kubernetes/k8s-secrets.tmpl > kubernetes/k8s-secrets.yaml
           kubectl apply -f kubernetes/k8s-secrets.yaml
           kubectl apply -f kubernetes/k8s-configMap.yaml
