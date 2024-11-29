@@ -10,6 +10,8 @@ import logging
 from flask_cors import CORS
 from .infrastructure.databases.postgres.db import Session
 from flaskr.endpoint.User.User import User
+import newrelic.agent
+newrelic.agent.initialize('newrelic.ini')
 
 config = Config()
 
@@ -18,6 +20,7 @@ app = create_app('default')
 CORS(app)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('default')
+logger.info('starting application ...')
 app.json_encoder = JSONCustomEncoder
 
 def before_server_stop(*args, **kwargs):
